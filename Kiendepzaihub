@@ -1,163 +1,93 @@
+-- Create the GUI
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local ToolName = "Electric Claw"
-local NPCFolder = workspace:FindFirstChild("Enemies")
-local baseAttackCooldown = 0.175  -- Set cooldown for faster attacks
-local lastAttack = 0
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+local Button = Instance.new("TextButton")
 
-(getgenv()).Config = {
-    ["FastAttack"] = true,
-    ["ClickAttack"] = true
-}
+-- Button properties
+Button.Size = UDim2.new(0, 200, 0, 50)
+Button.Position = UDim2.new(0.5, -100, 0.5, -25)
+Button.Text = "Start Auto-Farm"
+Button.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+Button.Parent = ScreenGui
 
-local CombatFramework = require(LocalPlayer.PlayerScripts:WaitForChild("CombatFramework"))
-local CombatFrameworkR = getupvalues(CombatFramework)[2]
-local RigController = require(LocalPlayer.PlayerScripts.CombatFramework.RigController)
-local RigControllerR = getupvalues(RigController)[2]
+local autoFarming = false -- Variable to track if auto-farming is active
 
-local function tweenToPosition(targetPosition)
-    local character = LocalPlayer.Character
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if humanoidRootPart then
-        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition)})
-        tween:Play()
-        tween.Completed:Wait() -- Wait for the tween to finish
+-- Function to handle the farming logic
+local function autoFarm()
+    while autoFarming do
+        -- Your original script logic goes here
+        local QuestName = "MarineQuest2" -- Example initial quest
+        local QuestInfo = GetQuestInfo(QuestName) -- Call to your quest function
+        local QuestLevel = QuestInfo[1]
+        local NPCPosition = QuestInfo[2]
+        local MobName = QuestInfo[3]
+
+        -- Example of where you would handle quest logic
+        print("Farming for: " .. MobName) -- Replace with your actual logic
+
+        wait(1) -- Adjust wait time as necessary
+    end
+end
+
+-- Button click event
+Button.MouseButton1Click:Connect(function()
+    if autoFarming then
+        autoFarming = false
+        Button.Text = "Start Auto-Farm"
     else
-        warn("HumanoidRootPart not found!")
+        autoFarming = true
+        Button.Text = "Stop Auto-Farm"
+        autoFarm() -- Start the farming process
     end
-end
-
-local function moveToNearestNPC()
-    local character = LocalPlayer.Character
-    if character then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if not humanoidRootPart then
-            warn("HumanoidRootPart not found!")
-            return nil
-        end
-
-        local nearestNPC = nil
-        local closestDistance = math.huge
-        local detectionRadius = 10000 -- Increased hitbox radius for NPC detection
-
-        for _, npc in pairs(NPCFolder:GetChildren()) do
-            if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-                local distance = (humanoidRootPart.Position - npc.HumanoidRootPart.Position).magnitude
-                if distance < closestDistance and distance <= detectionRadius then
-                    closestDistance = distance
-                    nearestNPC = npc
-                end
-            end
-        end
-
-        if nearestNPC then
-            local npcPosition = nearestNPC.HumanoidRootPart.Position + Vector3.new(0, 5, 0) -- Position above the NPC
-            tweenToPosition(npcPosition) -- Tween to the NPC position above
-            return nearestNPC
-        end
-    end
-    return nil
-end
-
-local function attackNPC(npc)
-    if npc and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
-        local character = LocalPlayer.Character
-        local ac = CombatFrameworkR.activeController
-        if ac and ac.equipped then
-            for indexincrement = 1, 1 do
-                local bladehit = getAllBladeHits(60) -- Assuming this function is defined
-                if #bladehit > 0 then
-                    local AcAttack8 = debug.getupvalue(ac.attack, 5)
-                    local AcAttack9 = debug.getupvalue(ac.attack, 6)
-                    local AcAttack7 = debug.getupvalue(ac.attack, 4)
-                    local AcAttack10 = debug.getupvalue(ac.attack, 7)
-
-                    local NumberAc12 = (AcAttack8 * 798405 + AcAttack7 * 727595) % AcAttack9
-                    local NumberAc13 = AcAttack7 * 798405
-                    (function()
-                        NumberAc12 = (NumberAc12 * AcAttack9 + NumberAc13) % 1099511627776
-                        AcAttack8 = math.floor(NumberAc12 / AcAttack9)
-                        AcAttack7 = NumberAc12 - AcAttack8 * AcAttack9
-                    end)()
-                    AcAttack10 = AcAttack10 + 1
-                    debug.setupvalue(ac.attack, 5, AcAttack8)
-                    debug.setupvalue(ac.attack, 6, AcAttack9)
-                    debug.setupvalue(ac.attack, 4, AcAttack7)
-                    debug.setupvalue(ac.attack, 7, AcAttack10)
-
-                    for k, v in pairs(ac.animator.anims.basic) do
-                        v:Play(0.01, 0.01, 0.01)
-                    end
-
-                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", bladehit, 2, "") 
-                end
-            end
-        else
-            warn("Combat not initialized or tool not found!")
-        end
-    end
-end
-
-local function checkHealth()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        local humanoid = LocalPlayer.Character.Humanoid
-        return humanoid.Health > 0
-    end
-    return false
-end
-
-local function autoFarmAllNPCs()
-    local nearestNPC = moveToNearestNPC()
-    if nearestNPC and checkHealth() then
-        local currentTime = tick()
-        if currentTime - lastAttack >= baseAttackCooldown then
-            attackNPC(nearestNPC)
-            lastAttack = currentTime
-        end
-    else
-        warn("No NPCs found or player is dead!")
-    end
-end
-
--- Run continuously to farm with random wait time
-while wait(math.random(0.5, 1.5)) do
-    if not checkHealth() then
-        warn("Player is dead, stopping auto-farm.")
-        break
-    end
-    autoFarmAllNPCs()
-end
-
--- Click attack for mobile
-spawn(function()
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if getgenv().Config['ClickAttack'] then
-            pcall(function()
-                game:GetService'VirtualUser':CaptureController()
-                game:GetService'VirtualUser':Button1Down(Vector2.new(0, 1))
-            end)
-        end
-    end)
 end)
 
--- Handle errors by displaying a message on the screen
-local function showError(message)
-    local errorLabel = Instance.new("TextLabel")
-    errorLabel.Size = UDim2.new(0, 200, 0, 50)
-    errorLabel.Position = UDim2.new(0.5, -100, 0.5, -25)
-    errorLabel.BackgroundColor3 = Color3.new(1, 0, 0)
-    errorLabel.TextColor3 = Color3.new(1, 1, 1)
-    errorLabel.Text = message
-    errorLabel.TextScaled = true
-    errorLabel.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+-- Existing function definitions
+function GetQuestInfo(QuestName) -- Example function
+    local QuestLevel, MobName, NPCPosition, LevelRequire, Mon
+    if QuestName == "MarineQuest2" then
+        QuestLevel = 1
+        MobName = "Chief Petty Officer [Lv. 120]"
+        Mon = "Chief Petty Officer"
+        LevelRequire = 120
+        NPCPosition = CFrame.new(0, 0, 0) -- Update with actual position if needed
+    elseif QuestName == "ImpelQuest" then
+        QuestLevel = 2
+        MobName = "Dangerous Prisoner [Lv. 190]"
+        Mon = "Dangerous Prisoner"
+        LevelRequire = 210
+        NPCPosition = CFrame.new(5310.60547, 0.350014925, 474.946594)
+    elseif QuestName == "SkyExp1Quest" then
+        QuestLevel = 2
+        MobName = "Sky Enemy" -- Update with actual enemy names
+        Mon = "Sky Enemy"
+        LevelRequire = 300
+        NPCPosition = CFrame.new(-7859.09814, 5544.19043, -381.476196)
+    elseif QuestName == "Area2Quest" and QuestLevel == 2 then
+        QuestLevel = 1
+        MobName = "Swan Pirate [Lv. 775]"
+        Mon = "Swan Pirate"
+        LevelRequire = 775
+    end
 
-    wait(5) -- Show for 5 seconds
-    errorLabel:Destroy()
+    return {
+        QuestLevel,
+        NPCPosition,
+        MobName,
+        QuestName,
+        LevelRequire,
+        Mon,
+    }
 end
 
--- Example usage of the showError function
-if not LocalPlayer.Character then
-    showError("Error: No character found!")
+function Bypass(Point) -- Existing function
+    -- Your existing Bypass function code here
+    -- ...
 end
+
+function toTarget(...) -- Existing function
+    -- Your existing toTarget function code here
+    -- ...
+end
+
+-- Continue adding your existing functions as necessary
