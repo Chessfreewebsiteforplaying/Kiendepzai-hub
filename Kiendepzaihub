@@ -1,3 +1,6 @@
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ORION-SCRIPT/Orion/main/source.lua"))()
+local Window = OrionLib:MakeWindow({Name = "BloxFruits Script Test", HidePremium = true})
+
 for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
@@ -9,8 +12,7 @@ for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 	end
 end
 
----autofarm Level
----lv 0-10
+--- Auto farm Level
 function CheckQuest()
 	local Lv = game.Players.LocalPlayer.Data.Level.Value
 	if Lv == 0 or Lv <= 10 then
@@ -63,12 +65,8 @@ spawn(function()
 	end)
 end)
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("BloxFruits Script Test", "Ocean")
-
----Main
-local Main = Window:NewTab("Main")
-local MainSection = Main:NewSection("Main")
+-- Orion UI
+local MainSection = Window:NewSection("Main")
 
 local toolDropdown = MainSection:NewDropdown("Weapon", "Choose your tool to use!", tools, function(weapon) end)
 
@@ -98,7 +96,7 @@ local FakeBeliTextBox = MainSection:NewTextBox("Fake Beli", "Fake Beli", functio
 	game.Players.LocalPlayer.Data.Level.Value = fakebeli
 end)
 
----Stats
+-- Stats Section
 local Stats = Window:NewTab("Stats")
 local StatsSection = Stats:NewSection("Stats")
 
@@ -187,34 +185,33 @@ StatsSection:NewToggle("Devil Fruit", "Auto Stats", function(state)
 	end
 end)
 
----Teleport
+-- Teleport Section
 local Teleport = Window:NewTab("Teleport")
 local TeleportSection = Teleport:NewSection("Teleport")
 
 TeleportSection:NewButton("Pirate Island", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(45, Enum.EasingStyle.Linear)
-	tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(1041.8861083984375, 16.273563385009766, 1424.93701171875)}):Play()
+	game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(45, Enum.EasingStyle.Linear), {CFrame = CFrame.new(1041.8861083984375, 16.273563385009766, 1424.93701171875)}):Play()
 end)
 
 TeleportSection:NewButton("Marine Island", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(45, Enum.EasingStyle.Linear)
-	tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(-2896.6865234375, 41.488861083984375, 2009.27490234375)}):Play()
+	game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(45, Enum.EasingStyle.Linear), {CFrame = CFrame.new(-2896.6865234375, 41.488861083984375, 2009.27490234375)}):Play()
 end)
 
 TeleportSection:NewButton("Colosseum", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(45, Enum.EasingStyle.Linear)
-	tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(-1541.0882568359375, 7.389348983764648, -2987.40576171875)}):Play()
+	game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(45, Enum.EasingStyle.Linear), {CFrame = CFrame.new(-1541.0882568359375, 7.389348983764648, -2987.40576171875)}):Play()
 end)
 
 TeleportSection:NewButton("Desert", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(45, Enum.EasingStyle.Linear)
-	tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(1094.3209228515625, 6.569626808166504, 4231.6357421875)}):Play()
+	game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(45, Enum.EasingStyle.Linear), {CFrame = CFrame.new(1094.3209228515625, 6.569626808166504, 4231.6357421875)}):Play()
 end)
 
-TeleportSection:NewButton("Fouatin City ", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new(45, Enum.EasingStyle.Linear)
-	tweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(5529.7236328125, 429.35748291015625, 4245.5498046875)}):Play()
+TeleportSection:NewButton("Fouatin City", "Teleport you there", function()
+	game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(45, Enum.EasingStyle.Linear), {CFrame = CFrame.new(5529.7236328125, 429.35748291015625, 4245.5498046875)}):Play()
 end)
 
 TeleportSection:NewButton("Jungle", "Teleport you there", function()
-	tweenService, tweenInfo = game:GetService("TweenService"), Tween
+	-- Add Jungle teleport here
+end)
+
+-- Initialize Orion
+OrionLib:Init()
